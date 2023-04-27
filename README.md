@@ -11,7 +11,7 @@ a simple calculator
 the formula parser will ignore all whitespaces, line breaks, semicolons and tabulators, so a formula like
 ```
 p
-  o w   (1
+  o w;   (1
   2, 3)
 ```
 will get interpreted as `pow(12, 3)`.
