@@ -9,7 +9,7 @@ Window {
     color: mainWnd.color
 
     width: 400
-    height: settings.height + 20
+    height: settings.height + 30
 
     flags: Qt.SubWindow
 

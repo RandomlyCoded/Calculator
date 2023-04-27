@@ -53,7 +53,7 @@ Backend::Backend(QObject *parent)
 
     m_settingsFile = new QFile("settings.txt");
 
-    if(!m_settingsFile->open(QFile::ReadOnly) || !m_settingsFile->exists()) {
+    if(!m_settingsFile->open(QFile::ReadOnly)) {
         qWarning() << "cannot open settings:" << m_settingsFile->errorString();
         m_textcolor = QColor(0, 0, 0);
         m_outlinecolor = QColor(0xd2, 0xd2, 0xd2);
@@ -99,7 +99,6 @@ Backend::Backend(QObject *parent)
 
 Backend::~Backend()
 {
-    qInfo() << "detroying" << this;
     m_settingsFile->remove();
 
     m_settingsFile->open(QFile::WriteOnly);

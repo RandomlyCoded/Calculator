@@ -99,6 +99,7 @@ Window {
         Text {
             id: trivialExpressionRes
             font.bold: true
+            color: mainWnd.textColor
         }
 
         Column {
@@ -123,6 +124,7 @@ Window {
             Text {
                 id: complexExpressionRes
                 font.bold: true
+                color: mainWnd.textColor
             }
         }
     }
