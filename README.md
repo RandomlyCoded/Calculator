@@ -19,4 +19,4 @@ will get interpreted as `pow(12, 3)`.
 due to me being lazy, you need to pass *2 arguments* for every function, even if it takes only 1 argument
 I am going to change this behaviour in the future.
 
-the binary functions (or, and, xo, etc.) will directly combine the binary data of the arguments
+the binary functions (or, and, xor, etc.) will directly combine the binary data of the arguments
