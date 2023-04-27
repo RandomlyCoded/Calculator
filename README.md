@@ -15,6 +15,8 @@ p
   2, 3)
 ```
 will get interpreted as `pow(12, 3)`.
+
+There is also no difference between `sqrt` and `SqRt`.
   
 Due to me being lazy, you need to pass *2 arguments* for every function, even if it takes only 1 argument.
 I am going to change this behaviour in the future.
