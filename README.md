@@ -9,9 +9,9 @@ a simple calculator
 ## Other useful tips
 
 the formula parser will ignore all whitespaces, line breaks, semicolons and tabulators, so a formula like
-`p
+```p
   o w   (1
-  2, 3)`
+  2, 3)```
 will get interpreted as `pow(12, 3)`.
   
 due to me being lazy, you need to pass *2 arguments* for every function, even if it takes only 1 argument
