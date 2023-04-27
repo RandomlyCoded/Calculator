@@ -4,14 +4,33 @@ import QtQuick.Controls
 import Calculator
 
 Window {
-    id: wnd
-    width: 640
-    height: 480
+    id: mainWnd
+    width: mainContent.width + 20
+    height: mainContent.height + 20
     visible: true
-    title: "moin"
+    title: "just a random calculator"
+
+    property color textColor: Backend.textColor
+    property color outlineColor: Backend.outlineColor
+    color: Backend.backgroundColor
+
+
+    property bool bold: Backend.bold
+    property bool italic: Backend.italic
+    property string fontName: Backend.fontName
 
     Column {
+        id: mainContent
+        x: 10
+        y: 10
+
         spacing: 20
+
+        CustomButton {
+            text: (settingsWnd.visible ? "hide" : "show") + " settings window"
+
+            onClicked: settingsWnd.visible ^= 1
+        }
 
         Row {
             spacing: 10
@@ -21,7 +40,7 @@ Window {
                 tip: "enter number a, default: 0"
             }
 
-            Button {
+            CustomButton {
                 text: "set number for formula"
 
                 onClicked: Backend.setA(Backend.convert(numberA.text))
@@ -33,7 +52,7 @@ Window {
                 tip: "enter number b, default: 1"
             }
 
-            Button {
+            CustomButton {
                 text: "set number for formula"
 
                 onClicked: Backend.setB(Backend.convert(numberB.text))
@@ -41,24 +60,22 @@ Window {
         }
 
         Grid {
+            id: primitiveOperations
             rows: 10
             columns: 5
 
             spacing: 10
 
+            visible: Backend.showPrimitiveOperations
+
             Repeater {
                 model: Backend.availableFunctions
 
-                Button {
-                    width: 100
+                CustomButton {
+                    width: 150
                     height: 30
 
-                    Text{
-                        anchors.centerIn: parent
-                        textFormat: Text.RichText
-
-                        text: modelData
-                    }
+                    text: modelData
 
                     onClicked: {
                         let a = 0;
@@ -85,15 +102,21 @@ Window {
         }
 
         Column {
+            id: complexOperations
+
             spacing: 10
+
+            visible: Backend.showComplexOperations
+
             TextInputArea {
                 id: formula
                 tip: "enter a formula"
-                minimumWidth: wnd.width
+                minimumWidth: Math.min(300, mainWnd.width)
             }
 
-            Button {
+            CustomButton {
                 text: "run"
+
                 onClicked: complexExpressionRes.text = "= " + Backend.runFormula(formula.text)
             }
 
@@ -102,5 +125,9 @@ Window {
                 font.bold: true
             }
         }
+    }
+
+    SettingsWindow {
+        id: settingsWnd
     }
 }

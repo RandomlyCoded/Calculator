@@ -3,5 +3,7 @@
         <file>main.qml</file>
         <file>TextInputField.qml</file>
         <file>TextInputArea.qml</file>
+        <file>SettingsWindow.qml</file>
+        <file>CustomButton.qml</file>
     </qresource>
 </RCC>

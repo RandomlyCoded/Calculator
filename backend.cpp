@@ -1,6 +1,7 @@
 #include "backend.h"
 
 #include <QDebug>
+#include <QFile>
 #include <QRandomGenerator>
 
 #define NAME_A(f) {QString(#f) + "(a)", #f}
@@ -19,6 +20,7 @@ Backend::Backend(QObject *parent)
         {"sub",  {CalcFunc::sub,   2}},
 
         {"rng",  {CalcFunc::random,2}},
+        {"random",{CalcFunc::random, 2}},
 
         {"or",   {CalcFunc::_or,   2}},
         {"nor",  {CalcFunc::_nor,  2}},
@@ -48,6 +50,73 @@ Backend::Backend(QObject *parent)
         NAME  (nand),
         NAME_A(not),
     };
+
+    m_settingsFile = new QFile("settings.txt");
+
+    if(!m_settingsFile->open(QFile::ReadOnly) || !m_settingsFile->exists()) {
+        qWarning() << "cannot open settings:" << m_settingsFile->errorString();
+        m_textcolor = QColor(0, 0, 0);
+        m_outlinecolor = QColor(0xd2, 0xd2, 0xd2);
+        m_backgroundcolor = QColor(0xff, 0xff, 0xff);
+
+        m_showPrimitiveOperations = true;
+        m_showComplexOperations = true;
+
+        m_bold = false;
+        m_italic = false;
+        m_fontName = "Source Code Pro";
+    }
+    else {
+        QTextStream ds(m_settingsFile);
+
+        QString value;
+        ds >> value;
+        m_textcolor = value;
+
+        ds >> value;
+        m_outlinecolor = value;
+
+        ds >> value;
+        m_backgroundcolor = value;
+
+
+        ds >> value;
+        m_showPrimitiveOperations = value == "true";
+
+        ds >> value;
+        m_showComplexOperations = value == "true";
+
+
+        ds >> value;
+        m_bold = value == "true";
+
+        ds >> value;
+        m_italic = value == "true";
+
+        m_fontName = ds.readAll().trimmed();
+    }
+}
+
+Backend::~Backend()
+{
+    qInfo() << "detroying" << this;
+    m_settingsFile->remove();
+
+    m_settingsFile->open(QFile::WriteOnly);
+
+    QTextStream ds(m_settingsFile);
+
+    ds << m_textcolor.name() << '\n'
+       << m_outlinecolor.name() << '\n'
+       << m_backgroundcolor.name() << '\n'
+       << (m_showPrimitiveOperations ? "true" : "false") << '\n'
+       << (m_showComplexOperations ? "true" : "false") << '\n'
+       << (m_bold ? "true" : "false") << '\n'
+       << (m_italic ? "true" : "false") << '\n'
+       << m_fontName;
+
+    m_settingsFile->close();
+    delete m_settingsFile;
 }
 
 namespace CalculatorFunctions
@@ -149,7 +218,11 @@ double Backend::runFunc(QString name, double a, double b)
         qWarning() << "invalid function" << name;
         return qQNaN();
     }
-    return internRunFunc(internName, a, b);
+    double result = internRunFunc(internName, a, b);
+    if(m_useAnsForPrimitive)
+        m_ans = result;
+
+    return result;
 }
 
 double Backend::convert(QString text, double defaultV)

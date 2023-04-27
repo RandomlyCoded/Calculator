@@ -4,7 +4,8 @@ import QtQuick.Controls
 Rectangle {
     width: Math.max(minimumWidth, input.width + spacing * 2)
     height: input.height + spacing * 2
-    border.color: "black"
+    border.color: mainWnd.outlineColor
+    color: mainWnd.color
 
     property int minimumWidth: 20
     property int spacing: 2
@@ -19,13 +20,21 @@ Rectangle {
         id: input
 
         placeholderText: tip
+        placeholderTextColor: mainWnd.textColor
 
-        font.family: "source code pro"
+        color: mainWnd.textColor
+        font.family: mainWnd.fontName
+        font.bold: mainWnd.bold
+        font.italic: mainWnd.italic
 
         TextMetrics {
             id: spacer
             font: input.font
             text: " "
+        }
+
+        background: Rectangle {
+            color: mainWnd.color
         }
 
         tabStopDistance: spacer.advanceWidth * 4

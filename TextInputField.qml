@@ -3,7 +3,8 @@ import QtQuick 2.15
 Rectangle {
     width: Math.max(Math.max(tipText.width + spacing * 2, minimumWidth), input.width + spacing * 2)
     height: input.height + spacing * 2
-    border.color: "black"
+    border.color: mainWnd.outlineColor
+    color: mainWnd.color
 
     property int minimumWidth: 20
     property int spacing: 2
@@ -15,11 +16,21 @@ Rectangle {
     property alias text: input.text
     property alias pixelSize: input.font.pixelSize
 
+    signal editingFinished()
+
     TextInput {
         id: input
 
         x: spacing
         y: spacing
+
+        font.bold: mainWnd.bold
+        font.italic: mainWnd.italic
+        font.family: mainWnd.fontName
+
+        color: mainWnd.textColor
+
+        onEditingFinished: parent.editingFinished()
     }
 
     Text {
@@ -28,7 +39,7 @@ Rectangle {
         x: spacing
         y: spacing
 
-        color: "gray"
+        color: mainWnd.textColor
 
         font.pixelSize: pixelSize
         visible: maybeShow()
