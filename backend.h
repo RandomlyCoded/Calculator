@@ -6,6 +6,7 @@
 #include <QObject>
 
 class QFile;
+class QSettings;
 
 class Backend : public QObject
 {
@@ -32,29 +33,29 @@ public:
 
     bool ansForPrimitive() const { return m_useAnsForPrimitive; }
 
-    const QColor &settingTextColor() const { return m_textcolor; }
-    void setSettingTextColor(const QColor &newTextcolor) { m_textcolor = newTextcolor; emit settingTextColorChanged(); }
+    const QColor settingTextColor() const;
+    void setSettingTextColor(const QColor &newTextcolor);
 
-    const QColor &settingOutlineColor() const { return m_outlinecolor; }
-    void setSettingOutlineColor(const QColor &newOutlinecolor) { m_outlinecolor = newOutlinecolor; emit settingOutlineColorChanged(); }
+    const QColor settingOutlineColor() const;
+    void setSettingOutlineColor(const QColor &newOutlinecolor);
 
-    const QColor &settingBackgroundColor() const { return m_backgroundcolor; }
-    void setSettingBackgroundColor(const QColor &newBackgroundcolor) { m_backgroundcolor = newBackgroundcolor; emit settingBackgroundColorChanged(); }
+    const QColor settingBackgroundColor() const;
+    void setSettingBackgroundColor(const QColor &newBackgroundcolor);
 
-    bool settingBold() const { return m_bold; }
-    void setSettingBold(bool newBold) { m_bold = newBold; emit settingBoldChanged(); }
+    bool settingBold() const;
+    void setSettingBold(bool newBold);
 
-    bool settingItalic() const { return m_italic; }
-    void setSettingItalic(bool newItalic) { m_italic = newItalic; emit settingItalicChanged(); }
+    bool settingItalic() const;
+    void setSettingItalic(bool newItalic);
 
-    const QString &settingFontName() const { return m_fontName; }
-    void setSettingFontName(const QString &newFontName) { m_fontName = newFontName; emit settingFontNameChanged(); }
+    const QString settingFontName() const;
+    void setSettingFontName(const QString &newFontName);
 
-    bool settingShowPrimitiveOperations() const { return m_showPrimitiveOperations; }
-    void setSettingShowPrimitiveOperations(bool newShowPrimitiveOperations) { m_showPrimitiveOperations = newShowPrimitiveOperations; emit settingShowPrimitiveOperationsChanged(); }
+    bool settingShowPrimitiveOperations() const;
+    void setSettingShowPrimitiveOperations(bool newShowPrimitiveOperations);
 
-    bool settingShowComplexOperations() const { return m_showComplexOperations; }
-    void setSettingShowComplexOperations(bool newShowComplexOperations) { m_showComplexOperations = newShowComplexOperations; emit settingShowComplexOperationsChanged(); }
+    bool settingShowComplexOperations() const;
+    void setSettingShowComplexOperations(bool newShowComplexOperations);
 
 public slots:
     double runFunc(QString name, double a = 0, double b = 1);
@@ -67,6 +68,10 @@ public slots:
     void setB(double b);
 
     void toggleAnsForPrimitive() { m_useAnsForPrimitive ^= 1; emit ansForPrimitiveChanged(); }
+
+    void restoreDefaultSettings();
+
+    QString generateConfirmText() { return "lol"; }
 
 signals:
     void ansForPrimitiveChanged();
@@ -100,17 +105,7 @@ private:
     double internRunFunc(QString internName, double a, double b);
     bool m_useAnsForPrimitive = 0;
 
-    QColor m_textcolor;
-    QColor m_outlinecolor;
-    QColor m_backgroundcolor;
-
-    bool m_bold;
-    bool m_italic;
-    QString m_fontName;
-
-    QFile *m_settingsFile;
-    bool m_showPrimitiveOperations;
-    bool m_showComplexOperations;
+    QSettings *m_settings;
 };
 
 namespace CalculatorFunctions

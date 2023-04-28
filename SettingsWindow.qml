@@ -9,7 +9,10 @@ Window {
     color: mainWnd.color
 
     width: 400
-    height: settings.height + 30
+    height: settings.height + 40
+
+    x: mainWnd.x - width - 10
+    y: mainWnd.y
 
     flags: Qt.SubWindow
 
@@ -278,6 +281,80 @@ Window {
             text: mainWnd.fontName
 
             onEditingFinished: Backend.fontName = text
+        }
+
+        Column {
+            spacing: parent.spacing
+
+            CustomButton {
+                id: restoreSettings
+
+                text: "restore default settings"
+
+                onClicked: {
+                    cancel.visible = true;
+                    confirm.visible = true;
+                }
+            }
+
+            Row {
+                spacing: parent.spacing
+                CustomButton {
+                    id: confirm
+
+                    visible: false
+
+                    text: "confirm"
+
+                    onClicked: {
+                        finalConfirm.conf = Backend.generateConfirmText()
+                        finalConfirmHint.text = "to confirm, enter \"" + finalConfirm.conf + "\""
+                        finalConfirm.visible = true;
+                    }
+                }
+
+                Column {
+                    spacing: parent.spacing
+
+                    Text {
+                        id: finalConfirmHint
+                    }
+
+                    TextInputField {
+                        id: finalConfirm
+
+                        visible: false
+
+                        property string conf: ""
+
+                        tip: "enter text above"
+
+                        onEditingFinished: {
+                            if(text == conf)
+                                Backend.restoreDefaultSettings()
+
+                            visible = false;
+                            finalConfirmHint.visible = false;
+                            cancel.visible = false;
+                            confirm.visible = false;
+                        }
+                    }
+                }
+            }
+
+            CustomButton {
+                id: cancel
+
+                visible: false
+
+                text: "cancel"
+
+                onClicked: {
+                    confirm.visible = false;
+                    visible = false;
+                }
+            }
+
         }
     }
 }

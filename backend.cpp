@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QRandomGenerator>
+#include <QSettings>
 
 #define NAME_A(f) {QString(#f) + "(a)", #f}
 #define NAME(f) {QString(#f) + "(a, b)", #f}
@@ -51,72 +52,126 @@ Backend::Backend(QObject *parent)
         NAME_A(not),
     };
 
-    m_settingsFile = new QFile("settings.txt");
-
-    if(!m_settingsFile->open(QFile::ReadOnly)) {
-        qWarning() << "cannot open settings:" << m_settingsFile->errorString();
-        m_textcolor = QColor(0, 0, 0);
-        m_outlinecolor = QColor(0xd2, 0xd2, 0xd2);
-        m_backgroundcolor = QColor(0xff, 0xff, 0xff);
-
-        m_showPrimitiveOperations = true;
-        m_showComplexOperations = true;
-
-        m_bold = false;
-        m_italic = false;
-        m_fontName = "Source Code Pro";
-    }
-    else {
-        QTextStream ds(m_settingsFile);
-
-        QString value;
-        ds >> value;
-        m_textcolor = value;
-
-        ds >> value;
-        m_outlinecolor = value;
-
-        ds >> value;
-        m_backgroundcolor = value;
-
-
-        ds >> value;
-        m_showPrimitiveOperations = value == "true";
-
-        ds >> value;
-        m_showComplexOperations = value == "true";
-
-
-        ds >> value;
-        m_bold = value == "true";
-
-        ds >> value;
-        m_italic = value == "true";
-
-        m_fontName = ds.readAll().trimmed();
-    }
+    m_settings = new QSettings("settings.ini", QSettings::IniFormat, this);
+    if(Q_UNLIKELY(m_settings->value("color/text", "existance").toString() == "existance"))
+        restoreDefaultSettings();
 }
+
+
 
 Backend::~Backend()
 {
-    m_settingsFile->remove();
-
-    m_settingsFile->open(QFile::WriteOnly);
-
-    QTextStream ds(m_settingsFile);
-
-    ds << m_textcolor.name() << '\n'
-       << m_outlinecolor.name() << '\n'
-       << m_backgroundcolor.name() << '\n'
-       << (m_showPrimitiveOperations ? "true" : "false") << '\n'
-       << (m_showComplexOperations ? "true" : "false") << '\n'
-       << (m_bold ? "true" : "false") << '\n'
-       << (m_italic ? "true" : "false") << '\n'
-       << m_fontName;
-
-    m_settingsFile->close();
-    delete m_settingsFile;
 }
+
+ /********************************************
+ * Settings functions                        *
+ ********************************************/
+
+const QColor Backend::settingTextColor() const
+{
+    return m_settings->value("color/text").value<QColor>();
+}
+
+void Backend::setSettingTextColor(const QColor &newTextcolor)
+{
+    m_settings->setValue("color/text", newTextcolor);
+    emit settingTextColorChanged();
+}
+
+const QColor Backend::settingOutlineColor() const
+{
+    return m_settings->value("color/outline").value<QColor>();
+}
+
+void Backend::setSettingOutlineColor(const QColor &newOutlinecolor)
+{
+    m_settings->setValue("color/outline", newOutlinecolor);
+    emit settingOutlineColorChanged();
+}
+
+const QColor Backend::settingBackgroundColor() const
+{
+    return m_settings->value("color/background").value<QColor>();
+}
+
+void Backend::setSettingBackgroundColor(const QColor &newBackgroundcolor)
+{
+    m_settings->setValue("color/background", newBackgroundcolor);
+    emit settingBackgroundColorChanged();
+}
+
+bool Backend::settingBold() const
+{
+    return m_settings->value("font/bold").toBool();
+}
+
+void Backend::setSettingBold(bool newBold)
+{
+    m_settings->setValue("font/bold", newBold);
+    emit settingBoldChanged();
+}
+
+bool Backend::settingItalic() const
+{
+    return m_settings->value("font/italic").toBool();
+}
+
+void Backend::setSettingItalic(bool newItalic)
+{
+    m_settings->setValue("font/italic", newItalic);
+    emit settingItalicChanged();
+}
+
+const QString Backend::settingFontName() const
+{
+    return m_settings->value("font/name").toString();
+}
+
+void Backend::setSettingFontName(const QString &newFontName)
+{
+    m_settings->setValue("font/name", newFontName);
+    emit settingFontNameChanged();
+}
+
+bool Backend::settingShowPrimitiveOperations() const
+{
+    return m_settings->value("display/primitive").toBool();
+}
+
+void Backend::setSettingShowPrimitiveOperations(bool newShowPrimitiveOperations)
+{
+    m_settings->setValue("display/primitive", newShowPrimitiveOperations);
+    emit settingShowPrimitiveOperationsChanged();
+}
+
+bool Backend::settingShowComplexOperations() const
+{
+    return m_settings->value("display/complex").toBool();
+}
+
+void Backend::setSettingShowComplexOperations(bool newShowComplexOperations)
+{
+    m_settings->setValue("display/complex", newShowComplexOperations);
+    emit settingShowComplexOperationsChanged();
+}
+
+void Backend::restoreDefaultSettings()
+{
+    setSettingTextColor({0, 0, 0});
+    setSettingBackgroundColor({255, 255, 255});
+    setSettingOutlineColor({0x2d, 0x2d, 0x2d});
+
+    setSettingBold(false);
+    setSettingItalic(false);
+    setSettingFontName("Source Code Pro");
+
+    setSettingShowComplexOperations(true);
+    setSettingShowPrimitiveOperations(true);
+}
+
+ /****************************************************
+ * all these random functions used by the calculator *
+ ****************************************************/
 
 namespace CalculatorFunctions
 {
@@ -208,7 +263,12 @@ T _not(T a, T b)
 
 } // namespace CalculatorFunctions
 
-double fakeFunc(double, double) { return -1; }
+namespace
+{
+
+inline double fakeFunc(double, double) { return -1; }
+
+} // namespace
 
 double Backend::runFunc(QString name, double a, double b)
 {
