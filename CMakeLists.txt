@@ -9,9 +9,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt6 6.2 COMPONENTS Quick REQUIRED)
 
 add_executable(Calculator
-    main.cpp
-    qml.qrc
-    backend.h backend.cpp
+    src/main.cpp
+    src/backend.h src/backend.cpp
+
+    qml/qml.qrc
+
+    README.md
 )
 
 target_compile_definitions(Calculator
