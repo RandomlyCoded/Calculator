@@ -3,7 +3,6 @@ a simple calculator
 
 ## Notes about the settings
 
-- please **do not edit** settings.txt
 - enter color codes in the format "rrggbb" in the settings window
 
 ## Other useful tips
