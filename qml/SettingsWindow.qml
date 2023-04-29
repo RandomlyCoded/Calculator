@@ -61,6 +61,8 @@ Window {
 
             tip: "enter background color"
 
+            text: Settings.backgroundColor.toString().replace("#", "")
+
             onEditingFinished: Settings.backgroundColor = "#" + text
         }
 
@@ -69,6 +71,8 @@ Window {
 
             tip: "enter text color"
 
+            text: Settings.textColor.toString().replace("#", "")
+
             onEditingFinished: Settings.textColor = "#" + text
         }
 
@@ -76,6 +80,8 @@ Window {
             id: outlineColor
 
             tip: "enter outline color"
+
+            text: Settings.outlineColor.toString().replace("#", "")
 
             onEditingFinished: Settings.outlineColor = "#" + text
         }
@@ -104,6 +110,8 @@ Window {
             id: fontName
 
             text: mainWnd.fontName
+
+            tip: "enter font name"
 
             onEditingFinished: Settings.fontName = text
         }
