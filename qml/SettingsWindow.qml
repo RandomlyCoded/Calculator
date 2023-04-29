@@ -14,7 +14,7 @@ Window {
     x: mainWnd.x - width - 10
     y: mainWnd.y
 
-    flags: Qt.SubWindow
+    flags: Qt.Dialog
 
     title: "settings"
 
@@ -26,139 +26,34 @@ Window {
 
         spacing: 5
 
-        CheckBox {
+        CustomCheckBox {
             id: useAnsPrim
 
             checked: Backend.useAnsForPrimitive
 
             text: "use ans in primitive calculations"
 
-            onToggled: Backend.toggleAnsForPrimitive()
-
-            spacing: 5
-
-            indicator: Rectangle {
-                width: 15
-                height: width
-                y: parent.height / 2 - height / 2
-                border.color: mainWnd.outlineColor
-                color: mainWnd.color
-
-                Rectangle {
-                    radius: 1
-
-                    x: 4
-                    y: 4
-                    width: parent.width - 8
-                    height: width
-                    color: mainWnd.outlineColor
-                    visible: useAnsPrim.checked
-                }
-
-                radius: 3
-            }
-
-            contentItem: Text {
-                text: parent.text
-
-                leftPadding: parent.indicator.width + parent.spacing
-
-                font.family: mainWnd.fontName
-                font.bold: mainWnd.bold
-                font.italic: mainWnd.italic
-
-                color: mainWnd.textColor
-            }
+            onStateToggled: Backend.toggleAnsForPrimitive()
         }
 
-        CheckBox {
+        CustomCheckBox {
             id: showPrimOp
 
-            checked: Backend.showPrimitiveOperations
+            checked: Settings.showPrimitiveOperations
 
             text: "show primitive operation overview"
 
-            onToggled: Backend.showPrimitiveOperations ^= 1
-
-            spacing: 5
-
-            indicator: Rectangle {
-                width: 15
-                height: width
-                y: parent.height / 2 - height / 2
-                border.color: mainWnd.outlineColor
-                color: mainWnd.color
-
-                Rectangle {
-                    radius: 1
-
-                    x: 4
-                    y: 4
-                    width: parent.width - 8
-                    height: width
-                    color: mainWnd.outlineColor
-                    visible: showPrimOp.checked // TODO:: background text textInput
-                }
-
-                radius: 3
-            }
-
-            contentItem: Text {
-                text: parent.text
-
-                leftPadding: parent.indicator.width + parent.spacing
-
-                font.family: mainWnd.fontName
-                font.bold: mainWnd.bold
-                font.italic: mainWnd.italic
-
-                color: mainWnd.textColor
-            }
+            onStateToggled: Settings.showPrimitiveOperations ^= 1
         }
 
-        CheckBox {
+        CustomCheckBox {
             id: showComplexOp
 
-            checked: Backend.showComplexOperations
+            checked: Settings.showComplexOperations
 
             text: "show complex operation overview"
 
-            onToggled: Backend.showComplexOperations ^= 1
-
-            spacing: 5
-
-            indicator: Rectangle {
-                width: 15
-                height: width
-                y: parent.height / 2 - height / 2
-                border.color: mainWnd.outlineColor
-                color: mainWnd.color
-
-                Rectangle {
-                    radius: 1
-
-                    x: 4
-                    y: 4
-                    width: parent.width - 8
-                    height: width
-                    color: mainWnd.outlineColor
-                    visible: showComplexOp.checked
-                }
-
-                radius: 3
-            }
-
-            contentItem: Text {
-                text: parent.text
-
-                leftPadding: parent.indicator.width + parent.spacing
-
-                font.family: mainWnd.fontName
-                font.bold: mainWnd.bold
-                font.italic: mainWnd.italic
-
-                color: mainWnd.textColor
-            }
+            onStateToggled: Settings.showComplexOperations ^= 1
         }
 
         TextInputField {
@@ -166,7 +61,7 @@ Window {
 
             tip: "enter background color"
 
-            onEditingFinished: Backend.backgroundColor = "#" + text
+            onEditingFinished: Settings.backgroundColor = "#" + text
         }
 
         TextInputField {
@@ -174,7 +69,7 @@ Window {
 
             tip: "enter text color"
 
-            onEditingFinished: Backend.textColor = "#" + text
+            onEditingFinished: Settings.textColor = "#" + text
         }
 
         TextInputField {
@@ -182,97 +77,27 @@ Window {
 
             tip: "enter outline color"
 
-            onEditingFinished: Backend.outlineColor = "#" + text
+            onEditingFinished: Settings.outlineColor = "#" + text
         }
 
-        CheckBox {
+        CustomCheckBox {
             id: boldText
 
             text: "bold font"
 
             checked: mainWnd.bold
 
-            onToggled: Backend.bold ^= 1
-
-            spacing: 5
-
-            indicator: Rectangle {
-                width: 15
-                height: width
-                y: parent.height / 2 - height / 2
-                border.color: mainWnd.outlineColor
-                color: mainWnd.color
-
-                Rectangle {
-                    radius: 1
-
-                    x: 4
-                    y: 4
-                    width: parent.width - 8
-                    height: width
-                    color: mainWnd.outlineColor
-                    visible: boldText.checked
-                }
-
-                radius: 3
-            }
-
-            contentItem: Text {
-                text: parent.text
-
-                leftPadding: parent.indicator.width + parent.spacing
-
-                font.family: mainWnd.fontName
-                font.bold: mainWnd.bold
-                font.italic: mainWnd.italic
-
-                color: mainWnd.textColor
-            }
+            onStateToggled: Settings.bold ^= 1
         }
 
-        CheckBox {
+        CustomCheckBox {
             id: italicText
 
             text: "italic text"
 
             checked: mainWnd.italic
 
-            onToggled: Backend.italic ^= 1
-
-            spacing: 5
-
-            indicator: Rectangle {
-                width: 15
-                height: width
-                y: parent.height / 2 - height / 2
-                border.color: mainWnd.outlineColor
-                color: mainWnd.color
-
-                Rectangle {
-                    radius: 1
-
-                    x: 4
-                    y: 4
-                    width: parent.width - 8
-                    height: width
-                    color: mainWnd.outlineColor
-                    visible: italicText.checked
-                }
-
-                radius: 3
-            }
-
-            contentItem: Text {
-                text: parent.text
-
-                leftPadding: parent.indicator.width + parent.spacing
-
-                font.family: mainWnd.fontName
-                font.bold: mainWnd.bold
-                font.italic: mainWnd.italic
-
-                color: mainWnd.textColor
-            }
+            onStateToggled: Settings.italic ^= 1
         }
 
         TextInputField {
@@ -280,7 +105,7 @@ Window {
 
             text: mainWnd.fontName
 
-            onEditingFinished: Backend.fontName = text
+            onEditingFinished: Settings.fontName = text
         }
 
         Column {
@@ -330,8 +155,8 @@ Window {
                         tip: "enter text above"
 
                         onEditingFinished: {
-                            if(text == conf)
-                                Backend.restoreDefaultSettings()
+                            if(text === conf)
+                                Settings.restoreDefaultSettings()
 
                             visible = false;
                             finalConfirmHint.visible = false;
