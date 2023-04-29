@@ -11,15 +11,13 @@ class Settings;
 class Backend : public QObject
 {
     Q_OBJECT
+
     Q_PROPERTY(QList<QString> availableFunctions READ availableFunctions CONSTANT FINAL)
-    Q_PROPERTY(bool useAnsForPrimitive READ ansForPrimitive NOTIFY ansForPrimitiveChanged FINAL)
 
 public:
     explicit Backend(QObject *parent = nullptr);
 
     const QList<QString> availableFunctions() const { return m_functionNames.keys(); }
-
-    bool ansForPrimitive() const { return m_useAnsForPrimitive; }
 
 public slots:
     double runFunc(QString name, double a = 0, double b = 1);
@@ -31,14 +29,9 @@ public slots:
     void setA(double a);
     void setB(double b);
 
-    void toggleAnsForPrimitive() { m_useAnsForPrimitive ^= 1; emit ansForPrimitiveChanged(); }
-
     QString generateConfirmText();
 
     Settings *settings() { return m_settings; }
-
-signals:
-    void ansForPrimitiveChanged();
 
 private:
     QMap<QString, QPair<double(*)(double, double), int>> m_functions;
@@ -51,7 +44,6 @@ private:
     double parseArgument(QString arg);
     int argumentAmt(QString func);
     double internRunFunc(QString internName, double a, double b);
-    bool m_useAnsForPrimitive = 0;
 
     Settings *m_settings;
 };

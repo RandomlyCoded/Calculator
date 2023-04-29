@@ -20,6 +20,8 @@ class Settings : public QObject
     Q_PROPERTY(bool showPrimitiveOperations READ showPrimitiveOperations WRITE setShowPrimitiveOperations NOTIFY showPrimitiveOperationsChanged)
     Q_PROPERTY(bool showComplexOperations READ showComplexOperations WRITE setShowComplexOperations NOTIFY showComplexOperationsChanged)
 
+    Q_PROPERTY(bool useAnsInPrimitive READ useAnsInPrimitive WRITE setUseAnsInPrimitive NOTIFY useAnsInPrimitiveChanged)
+
 public:
     explicit Settings(QObject *parent = nullptr);
 
@@ -49,6 +51,9 @@ public:
     bool showComplexOperations();
     void setShowComplexOperations(bool newShow);
 
+    bool useAnsInPrimitive();
+    void setUseAnsInPrimitive(bool newUse);
+
 public slots:
     void restoreDefaultSettings();
 
@@ -63,6 +68,8 @@ signals:
 
     void showPrimitiveOperationsChanged();
     void showComplexOperationsChanged();
+
+    void useAnsInPrimitiveChanged();
 
 private:
     QSettings *const m_settings;

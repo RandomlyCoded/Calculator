@@ -99,6 +99,17 @@ void Settings::setShowComplexOperations(bool newShow)
     emit showComplexOperationsChanged();
 }
 
+bool Settings::useAnsInPrimitive()
+{
+    return m_settings->value("misc/useAnsInPrimitive").toBool();
+}
+
+void Settings::setUseAnsInPrimitive(bool newUse)
+{
+    m_settings->setValue("misc/useAnsInPrimitive", newUse);
+    emit useAnsInPrimitiveChanged();
+}
+
 void Settings::restoreDefaultSettings()
 {
     setTextColor({0, 0, 0});
@@ -111,4 +122,6 @@ void Settings::restoreDefaultSettings()
 
     setShowComplexOperations(true);
     setShowPrimitiveOperations(true);
+
+    setUseAnsInPrimitive(false);
 }

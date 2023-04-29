@@ -68,12 +68,14 @@ inline double fakeFunc(double, double) { return -1; }
 double Backend::runFunc(QString name, double a, double b)
 {
     QString internName = m_functionNames.value(name, "-invalid-");
+
     if(internName == "-invalid-") {
-        qWarning() << "invalid function" << name;
+        qWarning() << "cannot find intern name for function" << name;
         return qQNaN();
     }
+
     double result = internRunFunc(internName, a, b);
-    if(m_useAnsForPrimitive)
+    if(settings()->useAnsInPrimitive())
         m_ans = result;
 
     return result;
@@ -94,24 +96,31 @@ double Backend::convert(QString text, double defaultV)
 
 double Backend::runFormula(QString formula)
 {
+    if(formula.isEmpty()) {
+        qWarning() << "empty formula.";
+        return qQNaN();
+    }
+
     formula.remove(" ");
     formula.remove("\n");
     formula.remove("\t");
     formula.remove(";");
+
     qInfo() << "parsing" << formula;
+
     return parseArgument(formula);
 }
 
 void Backend::setA(double a)
 {
     m_a = a;
-    qInfo() << "a is now" << a;
+    qDebug() << "a is now" << a;
 }
 
 void Backend::setB(double b)
 {
     m_b = b;
-    qInfo() << "b is now" << b;
+    qDebug() << "b is now" << b;
 }
 
 QString Backend::generateConfirmText()
@@ -130,6 +139,13 @@ QString Backend::generateConfirmText()
 
 double Backend::parseArgument(QString arg)
 {
+    if(arg.isEmpty()) {
+        qWarning() << "empty argument" << arg;
+        return qQNaN();
+    }
+
+    const QString argStart = arg;
+
     QString firstData;
     int idx = 0;
     for(auto c: arg) {
@@ -155,13 +171,19 @@ double Backend::parseArgument(QString arg)
 
     arg.remove(0, idx);
 
-    if(arg.isEmpty())
+    if(arg.isEmpty()) {
+        qWarning() << "invalid argument" << argStart <<
+                      ": only function name, but no arguments were provided.";
         return qQNaN();
+    }
 
     arg.remove(0, arg.indexOf('(') + 1);
     int endParenthesis = arg.lastIndexOf(')');
-    if(endParenthesis == -1)
+    if(endParenthesis == -1) {
+        qWarning() << "invalid argument" << argStart << ": no terminating parenthesis";
         return qQNaN();
+    }
+
     arg.remove(endParenthesis, 1);
 
     QString _argA;
@@ -180,7 +202,7 @@ double Backend::parseArgument(QString arg)
     arg.remove(0, _argA.length() + 1);
     QString _argB = arg;
 
-    qInfo() << func << _argA << _argB;
+    qDebug().noquote() << func << ":" << _argA << "," << _argB;
 
     double argA = parseArgument(_argA);
     double argB = parseArgument(_argB);
@@ -205,7 +227,7 @@ double Backend::internRunFunc(QString internName, double a, double b)
         ret = func.first(a, b);
 
     else
-        qWarning() << "!!! unknown function name" << internName;
+        qWarning() << "unknown function name" << internName;
 
     return ret;
 }

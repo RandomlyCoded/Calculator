@@ -29,11 +29,11 @@ Window {
         CustomCheckBox {
             id: useAnsPrim
 
-            checked: Backend.useAnsForPrimitive
+            checked: Settings.useAnsInPrimitive
 
             text: "use ans in primitive calculations"
 
-            onStateToggled: Backend.toggleAnsForPrimitive()
+            onStateToggled: Settings.useAnsInPrimitive ^= 1
         }
 
         CustomCheckBox {

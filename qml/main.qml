@@ -14,7 +14,6 @@ Window {
     property color outlineColor: Settings.outlineColor
     color: Settings.backgroundColor
 
-
     property bool bold: Settings.bold
     property bool italic: Settings.italic
     property string fontName: Settings.fontName
