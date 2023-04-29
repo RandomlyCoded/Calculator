@@ -10,14 +10,14 @@ Window {
     visible: true
     title: "just a random calculator"
 
-    property color textColor: Backend.textColor
-    property color outlineColor: Backend.outlineColor
-    color: Backend.backgroundColor
+    property color textColor: Settings.textColor
+    property color outlineColor: Settings.outlineColor
+    color: Settings.backgroundColor
 
 
-    property bool bold: Backend.bold
-    property bool italic: Backend.italic
-    property string fontName: Backend.fontName
+    property bool bold: Settings.bold
+    property bool italic: Settings.italic
+    property string fontName: Settings.fontName
 
     Column {
         id: mainContent
@@ -66,7 +66,7 @@ Window {
 
             spacing: 10
 
-            visible: Backend.showPrimitiveOperations
+            visible: Settings.showPrimitiveOperations
 
             Repeater {
                 model: Backend.availableFunctions
@@ -107,7 +107,7 @@ Window {
 
             spacing: 10
 
-            visible: Backend.showComplexOperations
+            visible: Settings.showComplexOperations
 
             TextInputArea {
                 id: formula

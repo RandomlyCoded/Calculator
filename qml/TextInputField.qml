@@ -42,6 +42,8 @@ Rectangle {
         color: mainWnd.textColor
 
         font.pixelSize: pixelSize
+        font.bold: mainWnd.bold
+        font.italic: mainWnd.italic
         font.family: mainWnd.fontName
 
         visible: maybeShow()

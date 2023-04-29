@@ -11,6 +11,7 @@ find_package(Qt6 6.2 COMPONENTS Quick REQUIRED)
 add_executable(Calculator
     src/main.cpp
     src/backend.h src/backend.cpp
+    src/settings.h src/settings.cpp
 
     qml/qml.qrc
 

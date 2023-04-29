@@ -1,4 +1,5 @@
 #include "backend.h"
+#include "settings.h"
 
 #include <QDebug>
 #include <QFile>
@@ -52,124 +53,164 @@ Backend::Backend(QObject *parent)
         NAME_A(not),
     };
 
-    m_settings = new QSettings("settings.ini", QSettings::IniFormat, this);
-    if(Q_UNLIKELY(m_settings->value("color/text", "existance").toString() == "existance"))
-        restoreDefaultSettings();
+    m_settings = new Settings(this);
 }
 
-
-
-Backend::~Backend()
+namespace
 {
-}
 
- /********************************************
- * Settings functions                        *
- ********************************************/
+QRandomGenerator *const rng = QRandomGenerator::global();
 
-const QColor Backend::settingTextColor() const
+inline double fakeFunc(double, double) { return -1; }
+
+} // namespace
+
+double Backend::runFunc(QString name, double a, double b)
 {
-    return m_settings->value("color/text").value<QColor>();
+    QString internName = m_functionNames.value(name, "-invalid-");
+    if(internName == "-invalid-") {
+        qWarning() << "invalid function" << name;
+        return qQNaN();
+    }
+    double result = internRunFunc(internName, a, b);
+    if(m_useAnsForPrimitive)
+        m_ans = result;
+
+    return result;
 }
 
-void Backend::setSettingTextColor(const QColor &newTextcolor)
+double Backend::convert(QString text, double defaultV)
 {
-    m_settings->setValue("color/text", newTextcolor);
-    emit settingTextColorChanged();
+    bool success = true;
+    double data = text.toDouble(&success);
+    if(!success)
+        return defaultV;
+
+    if(qIsNaN(data))
+        return defaultV;
+
+    return data;
 }
 
-const QColor Backend::settingOutlineColor() const
+double Backend::runFormula(QString formula)
 {
-    return m_settings->value("color/outline").value<QColor>();
+    formula.remove(" ");
+    formula.remove("\n");
+    formula.remove("\t");
+    formula.remove(";");
+    qInfo() << "parsing" << formula;
+    return parseArgument(formula);
 }
 
-void Backend::setSettingOutlineColor(const QColor &newOutlinecolor)
+void Backend::setA(double a)
 {
-    m_settings->setValue("color/outline", newOutlinecolor);
-    emit settingOutlineColorChanged();
+    m_a = a;
+    qInfo() << "a is now" << a;
 }
 
-const QColor Backend::settingBackgroundColor() const
+void Backend::setB(double b)
 {
-    return m_settings->value("color/background").value<QColor>();
+    m_b = b;
+    qInfo() << "b is now" << b;
 }
 
-void Backend::setSettingBackgroundColor(const QColor &newBackgroundcolor)
+QString Backend::generateConfirmText()
 {
-    m_settings->setValue("color/background", newBackgroundcolor);
-    emit settingBackgroundColorChanged();
+    int len = rng->bounded(5, 10);
+    QString conf = "";
+    for(int i = 0; i < len; ++i) {
+        bool upper = rng->bounded(2) - 1;
+        if(upper)
+            conf.append(QChar(rng->bounded('a', 'z')));
+        else
+            conf.append(QChar(rng->bounded('A', 'Z')));
+    }
+    return conf;
 }
 
-bool Backend::settingBold() const
+double Backend::parseArgument(QString arg)
 {
-    return m_settings->value("font/bold").toBool();
+    QString firstData;
+    int idx = 0;
+    for(auto c: arg) {
+        if(c == '(' || c == ',')
+            break;
+        firstData += c;
+        ++idx;
+    }
+
+    bool isNumber;
+    double maybeNumber = firstData.toDouble(&isNumber);
+    if(isNumber)
+        return maybeNumber;
+
+    if(firstData.toLower() == "a")
+        return m_a;
+    if(firstData.toLower() == "b")
+        return m_b;
+    if(firstData.toLower() == "ans")
+        return m_ans;
+
+    QString func = firstData;
+
+    arg.remove(0, idx);
+
+    if(arg.isEmpty())
+        return qQNaN();
+
+    arg.remove(0, arg.indexOf('(') + 1);
+    int endParenthesis = arg.lastIndexOf(')');
+    if(endParenthesis == -1)
+        return qQNaN();
+    arg.remove(endParenthesis, 1);
+
+    QString _argA;
+
+    int childIdx = 0;
+    for(auto c: arg) {
+        if(c == '(')
+            ++childIdx;
+        if(c == ')')
+            --childIdx;
+        if(childIdx == 0 && c == ',')
+            break;
+        _argA += c;
+    }
+
+    arg.remove(0, _argA.length() + 1);
+    QString _argB = arg;
+
+    qInfo() << func << _argA << _argB;
+
+    double argA = parseArgument(_argA);
+    double argB = parseArgument(_argB);
+
+    if(qIsNaN(argA) || qIsNaN(argB))
+        return qQNaN();
+
+    return internRunFunc(func.toLower(), argA, argB);
 }
 
-void Backend::setSettingBold(bool newBold)
+int Backend::argumentAmt(QString func)
 {
-    m_settings->setValue("font/bold", newBold);
-    emit settingBoldChanged();
+    return m_functions[func].second;
 }
 
-bool Backend::settingItalic() const
+double Backend::internRunFunc(QString internName, double a, double b)
 {
-    return m_settings->value("font/italic").toBool();
+    auto func = m_functions.value(internName, {fakeFunc, -1});
+
+    double ret = qQNaN();
+    if(Q_LIKELY(func.second > 0))
+        ret = func.first(a, b);
+
+    else
+        qWarning() << "!!! unknown function name" << internName;
+
+    return ret;
 }
 
-void Backend::setSettingItalic(bool newItalic)
-{
-    m_settings->setValue("font/italic", newItalic);
-    emit settingItalicChanged();
-}
-
-const QString Backend::settingFontName() const
-{
-    return m_settings->value("font/name").toString();
-}
-
-void Backend::setSettingFontName(const QString &newFontName)
-{
-    m_settings->setValue("font/name", newFontName);
-    emit settingFontNameChanged();
-}
-
-bool Backend::settingShowPrimitiveOperations() const
-{
-    return m_settings->value("display/primitive").toBool();
-}
-
-void Backend::setSettingShowPrimitiveOperations(bool newShowPrimitiveOperations)
-{
-    m_settings->setValue("display/primitive", newShowPrimitiveOperations);
-    emit settingShowPrimitiveOperationsChanged();
-}
-
-bool Backend::settingShowComplexOperations() const
-{
-    return m_settings->value("display/complex").toBool();
-}
-
-void Backend::setSettingShowComplexOperations(bool newShowComplexOperations)
-{
-    m_settings->setValue("display/complex", newShowComplexOperations);
-    emit settingShowComplexOperationsChanged();
-}
-
-void Backend::restoreDefaultSettings()
-{
-    setSettingTextColor({0, 0, 0});
-    setSettingBackgroundColor({255, 255, 255});
-    setSettingOutlineColor({0x2d, 0x2d, 0x2d});
-
-    setSettingBold(false);
-    setSettingItalic(false);
-    setSettingFontName("Source Code Pro");
-
-    setSettingShowComplexOperations(true);
-    setSettingShowPrimitiveOperations(true);
-}
-
- /****************************************************
+/****************************************************
  * all these random functions used by the calculator *
  ****************************************************/
 
@@ -263,140 +304,3 @@ T _not(T a, T b)
 
 } // namespace CalculatorFunctions
 
-namespace
-{
-
-inline double fakeFunc(double, double) { return -1; }
-
-} // namespace
-
-double Backend::runFunc(QString name, double a, double b)
-{
-    QString internName = m_functionNames.value(name, "-invalid-");
-    if(internName == "-invalid-") {
-        qWarning() << "invalid function" << name;
-        return qQNaN();
-    }
-    double result = internRunFunc(internName, a, b);
-    if(m_useAnsForPrimitive)
-        m_ans = result;
-
-    return result;
-}
-
-double Backend::convert(QString text, double defaultV)
-{
-    bool success = true;
-    double data = text.toDouble(&success);
-    if(!success)
-        return defaultV;
-
-    if(qIsNaN(data))
-        return defaultV;
-
-    return data;
-}
-
-double Backend::runFormula(QString formula)
-{
-    formula.remove(" ");
-    formula.remove("\n");
-    formula.remove("\t");
-    formula.remove(";");
-    qInfo() << "parsing" << formula;
-    return parseArgument(formula);
-}
-
-void Backend::setA(double a)
-{
-    m_a = a;
-    qInfo() << "a is now" << a;
-}
-
-void Backend::setB(double b)
-{
-    m_b = b;
-    qInfo() << "b is now" << b;
-}
-
-double Backend::parseArgument(QString arg)
-{
-    QString firstData;
-    int idx = 0;
-    for(auto c: arg) {
-        if(c == '(' || c == ',')
-            break;
-        firstData += c;
-        ++idx;
-    }
-
-    bool isNumber;
-    double maybeNumber = firstData.toDouble(&isNumber);
-    if(isNumber)
-        return maybeNumber;
-
-    if(firstData.toLower() == "a")
-        return m_a;
-    if(firstData.toLower() == "b")
-        return m_b;
-    if(firstData.toLower() == "ans")
-        return m_ans;
-
-    QString func = firstData;
-
-    arg.remove(0, idx);
-
-    if(arg.isEmpty())
-        return qQNaN();
-
-    arg.remove(0, arg.indexOf('(') + 1);
-    int endParenthesis = arg.lastIndexOf(')');
-    if(endParenthesis == -1)
-        return qQNaN();
-    arg.remove(endParenthesis, 1);
-
-    QString _argA;
-
-    int childIdx = 0;
-    for(auto c: arg) {
-        if(c == '(')
-            ++childIdx;
-        if(c == ')')
-            --childIdx;
-        if(childIdx == 0 && c == ',')
-            break;
-        _argA += c;
-    }
-
-    arg.remove(0, _argA.length() + 1);
-    QString _argB = arg;
-
-    qInfo() << func << _argA << _argB;
-
-    double argA = parseArgument(_argA);
-    double argB = parseArgument(_argB);
-
-    if(qIsNaN(argA) || qIsNaN(argB))
-        return qQNaN();
-
-    return internRunFunc(func.toLower(), argA, argB);
-}
-
-int Backend::argumentAmt(QString func)
-{
-    return m_functions[func].second;
-}
-
-double Backend::internRunFunc(QString internName, double a, double b)
-{
-    auto func = m_functions.value(internName, {fakeFunc, -1});
-
-    double ret = qQNaN();
-    if(Q_LIKELY(func.second > 0))
-        ret = func.first(a, b);
-
-    else
-        qWarning() << "!!! unknown function name" << internName;
-
-    return ret;
-}
